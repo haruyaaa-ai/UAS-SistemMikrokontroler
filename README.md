@@ -1,57 +1,301 @@
-# 📡 IoT Radar Scanner & Monitoring System (ESP32 + Web Dashboard)
+# 🛰️ IoT Radar System (ESP32-Based)
 
-Sistem Radar berbasis Internet of Things (IoT) yang mendeteksi objek di sekitar menggunakan sensor ultrasonik HC-SR04 yang diputar oleh Motor Servo. Data sudut dan jarak yang didapatkan dikirimkan secara *real-time* ke **Web Dashboard** lokal via protokol HTTP API (Polling System). Proyek ini juga dilengkapi dengan indikator fisik (*traffic light module* dan alarm buzzer) serta kendali ambang batas (*threshold*) langsung dari web.
-
----
-
-## 🚀 Fitur Utama
-* **Scanning Otomatis**: Motor servo melakukan *sweeping* horizontal dari sudut 0° hingga 180° dan kembali lagi secara presisi.
-* **Filter Data Cerdas**: Pengukuran jarak dioptimalkan hanya pada sudut genap untuk mencegah *stuttering* (gerakan servo tersendat).
-* **Indikator Keamanan Fisik (3 Zona)**:
-  * 🔴 **Zona Bahaya (1-15 cm)**: LED Merah Menyala + Buzzer Berbunyi konstan.
-  * 🟡 **Zona Waspada (16-30 cm)**: LED Kuning Menyala + Buzzer Mati.
-  * 🟢 **Zona Aman (>30 cm)**: LED Hijau Menyala + Buzzer Mati.
-* **Integrasi Web Dashboard**: Menyediakan Endpoint API `/data` dalam format JSON yang diperbarui setiap 200 ms via Port 80.
-* **Cross-Origin Resource Sharing (CORS) Enabled**: Server ESP32 dikonfigurasi agar dapat diakses dengan aman oleh browser web lokal tanpa kendala pemblokiran privasi.
+> UAS Sistem Mikrokontroler - ESP32 IoT Radar dengan FreeRTOS dan Web Dashboard
 
 ---
 
-## 🛠️ Komponen Elektronik & Pinout
+## 👨‍🎓 Informasi Mahasiswa
 
-Komponen yang digunakan beserta konfigurasi pin pada ESP32:
-
-| Nama Komponen | Pin Komponen | Pin GPIO ESP32 | Keterangan |
-| :--- | :--- | :--- | :--- |
-| **Sensor Ultrasonik HC-SR04** | Trig | `GPIO 5` | Memicu pulsa ultrasonik |
-| | Echo | `GPIO 18` | Menerima pantulan gelombang |
-| **Motor Servo SG90 / MG90S** | PWM / Data (Oranye) | `GPIO 19` | Mengendalikan sudut rotasi |
-| **Traffic Light Module** | LED Red (Merah) | `GPIO 25` | Indikator jarak bahaya |
-| | LED Yellow (Kuning)| `GPIO 26` | Indikator jarak waspada |
-| | LED Green (Hijau) | `GPIO 27` | Indikator jarak aman |
-| **Active Buzzer** | Positif (+) | `GPIO 23` | Alarm suara peringatan |
-
-> **Catatan Daya**: Pastikan pin VCC Servo dan Buzzer dihubungkan ke pin `VIN` atau `5V` pada ESP32 (atau *external power supply* jika servo tersendat) karena pin `3V3` tidak kuat memasok arus yang cukup.
+| Keterangan | Detail |
+|------------|--------|
+| **Nama** | Damar Satriatama Putra |
+| **NIM** | 23552011300 |
+| **Kelas** | TIF RP 23 CNS A |
+| **Mata Kuliah** | Sistem Mikrokontroler |
+| **Proyek** | IoT Radar System Berbasis ESP32 |
 
 ---
 
-## 💻 Kebutuhan Perangkat Lunak (Software)
+# 📖 Deskripsi Proyek
 
-Sebelum melakukan *compile* program di Arduino IDE, pastikan beberapa pustaka (*library*) berikut sudah terinstal melalui **Library Manager** (`Ctrl + Shift + I`):
-1. **ESP32Servo** (oleh Kevin Harrington) – Untuk kendali motor servo pada arsitektur ESP32.
-2. **WebServer** (Bawaan core ESP32) – Untuk menangani request HTTP dari web dashboard.
-3. **WiFi** (Bawaan core ESP32) – Untuk menghubungkan ESP32 ke jaringan lokal.
+https://github.com/user-attachments/assets/d091dc7e-f6a2-41be-82cf-5c27018a7653
+
+IoT Radar System merupakan sistem pemindaian objek berbasis **ESP32** yang memanfaatkan sensor ultrasonik **HC-SR04** dan motor **Servo** untuk melakukan scanning area secara otomatis dari sudut **0° hingga 180°**.
+
+ESP32 berfungsi sebagai pusat pengendali seluruh perangkat sekaligus web server sehingga hasil pemindaian dapat dipantau secara **real-time** melalui browser menggunakan jaringan Wi-Fi.
+
+Data yang diperoleh berupa:
+
+- Sudut Servo
+- Jarak Objek
+- Status Keamanan
+- Informasi Monitoring
+
+Seluruh data dikirim dalam format **JSON API** sehingga dapat divisualisasikan pada dashboard web secara langsung.
 
 ---
 
-## 📝 Cara Instalasi & Penggunaan
+# ✨ Fitur Utama
 
-### 1. Sisi Perangkat Keras (Hardware)
-1. Rangkai seluruh komponen sesuai dengan tabel **Pinout** di atas.
-2. Rekatkan sensor ultrasonik di atas *horn* (baling-baling) motor servo menggunakan perekat atau lem agar ikut berputar saat servo bergerak.
+## 📡 Radar Scanning 180°
 
-### 2. Sisi Firmware (ESP32)
-1. Buka file `.ino` proyek ini di Arduino IDE.
-2. Cari baris berikut dan sesuaikan dengan Wi-Fi di tempatmu:
-   ```cpp
-   const char* ssid     = "NAMA_WIFI_KAMU";
-   const char* password = "PASSWORD_WIFI_KAMU";
+Servo bergerak otomatis dari:
+
+- 0°
+- sampai
+- 180°
+
+Sensor HC-SR04 membaca jarak objek pada setiap sudut sehingga menghasilkan data pemindaian secara real-time.
+
+---
+
+## 🌐 Embedded Web Server
+
+ESP32 menyediakan web server internal yang dapat diakses melalui browser menggunakan alamat IP lokal.
+
+Endpoint yang tersedia:
+
+| Endpoint | Fungsi |
+|----------|---------|
+| `/` | Dashboard |
+| `/data` | Mengirim data radar (JSON) |
+| `/status` | Status perangkat |
+| `/scan` | Menjalankan scanning |
+| `/stop` | Menghentikan scanning |
+
+---
+
+## 🔔 Early Warning System
+
+Sistem memberikan indikator berdasarkan jarak objek.
+
+| Zona | Jarak | Indikator |
+|-------|--------|-----------|
+| 🟢 Aman | >30 cm | LED Hijau |
+| 🟡 Waspada | 16–30 cm | LED Kuning |
+| 🔴 Bahaya | ≤15 cm | LED Merah + Buzzer |
+
+
+# 🛠 Hardware
+
+Komponen yang digunakan:
+
+- ESP32 Development Board
+- Sensor Ultrasonik HC-SR04
+- Servo Motor SG90
+- LED Merah
+- LED Kuning
+- LED Hijau
+- Active Buzzer
+- Breadboard
+- Kabel Jumper
+
+---
+
+# 🔌 Pin Mapping
+
+| Komponen | GPIO |
+|-----------|------|
+| TRIG | GPIO 5 |
+| ECHO | GPIO 18 |
+| Servo | GPIO 19 |
+| LED Merah | GPIO 25 |
+| LED Kuning | GPIO 26 |
+| LED Hijau | GPIO 27 |
+| Buzzer | GPIO 23 |
+
+---
+
+# 🚨 Logika Early Warning
+
+Program membagi hasil deteksi menjadi tiga kategori.
+
+## 🔴 Zona Bahaya
+
+**Jarak ≤15 cm**
+
+- LED Merah ON
+- Buzzer ON
+
+---
+
+## 🟡 Zona Waspada
+
+**16–30 cm**
+
+- LED Kuning ON
+- Buzzer OFF
+
+---
+
+## 🟢 Zona Aman
+
+**>30 cm**
+
+- LED Hijau ON
+- Buzzer OFF
+
+---
+
+# 🌐 Web Dashboard
+
+Dashboard digunakan untuk memonitor hasil scanning secara real-time.
+
+---
+
+## 🏠 Dashboard
+
+Halaman utama monitoring radar.
+
+### Fitur
+
+- Radar Visualization
+- Live Distance
+- Current Angle
+- Total Object Detection
+- Device Status
+- Detection Log
+- Scan Button
+- Pause Button
+- Clear Data Button
+
+> **Dashboard**
+
+<img width="1280" height="598" alt="image" src="https://github.com/user-attachments/assets/328e23dd-ef3f-4546-aa6a-192506b4d27f" />
+
+## 📜 Detection History
+
+Menyimpan riwayat hasil scanning.
+
+### Fitur
+
+- Timestamp
+- Angle
+- Distance
+- Status
+- Export CSV
+
+> **Tampilan History**
+
+<img src="https://github.com/user-attachments/assets/f52f59a5-d38b-42b7-9c0f-71165add5ca4" alt="History">
+
+## ⚙ Pengaturan
+
+Halaman konfigurasi sistem.
+
+### Pengaturan
+
+#### ESP32 Connection
+
+- IP Address
+- Port
+- Polling Interval
+
+#### Threshold
+
+- Danger Distance
+- Warning Distance
+- Maximum Distance
+
+#### Notification
+
+- Buzzer ON/OFF
+- Browser Notification
+- Demo Mode
+
+> **Tampilan Pengaturan**
+
+<img width="640" height="299" alt="image" src="https://github.com/user-attachments/assets/fa6936ec-a196-49a2-bdcd-a37dd577341d" />
+
+
+## ℹ Tentang
+
+Berisi dokumentasi sistem.
+
+### Informasi
+
+- Hardware Specification
+- Wiring Diagram
+- GPIO Mapping
+- API Documentation
+
+Contoh JSON Response
+
+```json
+{
+  "angle": 90,
+  "distance": 24,
+  "status": "WARNING"
+}
+```
+
+Endpoint API
+
+```
+GET /data
+GET /status
+GET /scan
+GET /stop
+```
+
+> **Tampilan Tentang**
+
+<img width="1280" height="596" alt="image" src="https://github.com/user-attachments/assets/c02f0138-e968-4d99-aacb-63214453edfb" />
+
+
+# 📂 Struktur Project
+
+```
+Radar-System/
+│
+├── radar_sensor2.ino
+├── README.md
+├── assets/
+│   ├── dashboard.png
+│   ├── history.png
+│   ├── settings.png
+│   └── about.png
+└── docs/
+```
+
+---
+
+# 📊 Alur Kerja Sistem
+
+```
+HC-SR04
+     │
+     ▼
+ESP32
+     │
+     ├──────── Servo Scan
+     │
+     ├──────── LED & Buzzer
+     │
+     └──────── Wi-Fi
+               │
+               ▼
+        Web Dashboard
+```
+
+---
+
+# 🎯 Kesimpulan
+
+IoT Radar System berbasis ESP32 berhasil mengintegrasikan sensor ultrasonik, motor servo, indikator LED, buzzer, serta web dashboard dalam satu sistem monitoring yang mampu melakukan pemindaian objek secara real-time.
+
+Implementasi **FreeRTOS** memungkinkan proses scanning radar dan layanan web server berjalan secara paralel pada dua core ESP32 sehingga sistem menjadi lebih responsif, stabil, dan efisien dibandingkan menggunakan metode pemrograman Arduino konvensional.
+
+Dashboard web memberikan kemudahan dalam memonitor hasil pemindaian, melihat riwayat deteksi, melakukan konfigurasi sistem, serta mengakses dokumentasi perangkat secara terpusat.
+
+---
+
+# 👩‍💻 Author
+
+**Damar Satriatama Putra**
+
+NIM : **23552011300**
+
+Universitas Teknologi Bandung
+
+Program Studi Teknik Informatika
